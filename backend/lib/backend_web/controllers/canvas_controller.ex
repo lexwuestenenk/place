@@ -40,7 +40,7 @@ defmodule BackendWeb.CanvasController do
   end
 
   def update(conn, %{"canvas_id" => canvas_id} = params) do
-    case CanvasContext.edit_canvas(canvas_id, Map.delete(params, "canvas_id")) do
+    case CanvasContext.update_canvas(canvas_id, Map.delete(params, "canvas_id")) do
       {:ok, canvas} ->
         json(conn, %{canvas: serialize_canvas(canvas)})
 

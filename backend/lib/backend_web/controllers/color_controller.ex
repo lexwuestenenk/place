@@ -23,7 +23,7 @@ defmodule BackendWeb.ColorController do
   end
 
   def update(conn, %{"canvas_id" => canvas_id, "color_id" => color_id} = params) do
-    case CanvasContext.edit_color(canvas_id, color_id, Map.delete(params, ["canvas_id", "color_id"])) do
+    case CanvasContext.update_color(canvas_id, color_id, Map.delete(params, ["canvas_id", "color_id"])) do
       {:ok, color} ->
         json(conn, %{canvas: serialize_color(color)})
 

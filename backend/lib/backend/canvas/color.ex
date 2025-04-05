@@ -5,6 +5,8 @@ defmodule Backend.Canvas.Color do
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "colors" do
     belongs_to :canvas, Backend.Canvas.Canvas, foreign_key: :canvas_id, type: :binary_id
+    has_many :pixels, Backend.Canvas.Pixel, foreign_key: :color_id
+
     field :hex, :string
     field :index, :integer
 
