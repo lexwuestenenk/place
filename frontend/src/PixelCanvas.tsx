@@ -8,7 +8,8 @@ export type Pixel = {
 
 type Props = {
   pixels: Pixel[];
-  gridSize: number;
+  gridWidth: number;
+  gridHeight: number;
   zoom: number;
   offset: { x: number; y: number };
   onZoomChange: (zoom: number) => void;
@@ -21,7 +22,8 @@ const CELL_SIZE = 10;
 
 function PixelCanvas({
   pixels,
-  gridSize,
+  gridWidth,
+  gridHeight,
   zoom,
   offset,
   onZoomChange,
@@ -33,7 +35,7 @@ function PixelCanvas({
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
 
-  // Drag and zoom handlers
+  // Handle pan and zoom
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -80,7 +82,7 @@ function PixelCanvas({
     };
   }, [offset, zoom, onOffsetChange, onZoomChange]);
 
-  // Pixel click handler
+  // Handle click to select a pixel
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -95,9 +97,9 @@ function PixelCanvas({
 
       if (
         pixelX >= 0 &&
-        pixelX < gridSize &&
+        pixelX < gridWidth &&
         pixelY >= 0 &&
-        pixelY < gridSize
+        pixelY < gridHeight
       ) {
         onPixelClick(pixelX, pixelY);
       }
@@ -107,23 +109,33 @@ function PixelCanvas({
     return () => {
       canvas.removeEventListener('click', handleClick);
     };
-  }, [zoom, offset, gridSize, onPixelClick]);
+  }, [zoom, offset, gridWidth, gridHeight, onPixelClick]);
 
-  // Render canvas
+  // Render canvas content
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Set canvas size to match DOM size
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Fill full canvas background (screen space)
+    ctx.fillStyle = '#f1f5f9'; // Tailwind's slate-100
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Zoom & pan transform
     ctx.save();
     ctx.translate(offset.x, offset.y);
     ctx.scale(zoom, zoom);
 
+    // Draw white grid background (inside zoom space)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, gridWidth * CELL_SIZE, gridHeight * CELL_SIZE);
+
+    // Draw all pixels
     for (const pixel of pixels) {
       ctx.fillStyle = pixel.color;
       ctx.fillRect(
@@ -134,19 +146,20 @@ function PixelCanvas({
       );
     }
 
+    // Highlight selected pixel
     if (selectedPixel) {
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(
-          selectedPixel.x * CELL_SIZE + 1,
-          selectedPixel.y * CELL_SIZE + 1,
-          CELL_SIZE - 2,
-          CELL_SIZE - 2
-        );
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        selectedPixel.x * CELL_SIZE + 1,
+        selectedPixel.y * CELL_SIZE + 1,
+        CELL_SIZE - 2,
+        CELL_SIZE - 2
+      );
     }
 
     ctx.restore();
-  }, [pixels, zoom, offset, selectedPixel]);
+  }, [pixels, zoom, offset, selectedPixel, gridWidth, gridHeight]);
 
   return (
     <canvas

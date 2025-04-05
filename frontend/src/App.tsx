@@ -2,14 +2,11 @@ import { useState, useCallback } from 'react';
 import PixelCanvas, { Pixel } from './PixelCanvas';
 import ColorPicker, { Color } from './ColorPicker';
 
-const GRID_SIZE = 200;
+const GRID_WIDTH = 400;
+const GRID_HEIGHT = 200;
 
 export default function App() {
-  const [pixels, setPixels] = useState<Pixel[]>(Array.from({ length: GRID_SIZE }, (_, i) => ({
-    x: i,
-    y: i,
-    color: i % 2 === 0 ? '#00f' : '#0f0',
-  })));
+  const [pixels, setPixels] = useState<Pixel[]>([]);
   const colors: Color[] = [
     { hex: 'FF0000', index: 1 },
     { hex: '0000FF', index: 2 },
@@ -44,9 +41,10 @@ export default function App() {
 
   return (
     <div className="w-screen h-screen flex flex-col">
-      <div className='absolute bottom-0 left-0 w-full h-[10vh]'>
-        <ColorPicker 
+      <div className="absolute bottom-0 left-0 w-full h-[10vh]">
+        <ColorPicker
           colors={colors}
+          selectedColor={selectedColor}
           onColorClick={setSelectedColor}
           onSubmit={handleApplyColor}
           selectedPixel={selectedPixel}
@@ -56,7 +54,8 @@ export default function App() {
       <div className="flex-1">
         <PixelCanvas
           pixels={pixels}
-          gridSize={GRID_SIZE}
+          gridWidth={GRID_WIDTH}
+          gridHeight={GRID_HEIGHT}
           zoom={zoom}
           offset={offset}
           onZoomChange={setZoom}
