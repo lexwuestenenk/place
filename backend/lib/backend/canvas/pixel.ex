@@ -20,8 +20,8 @@ defmodule Backend.Canvas.Pixel do
     pixel
     |> cast(attrs, [:canvas_id, :color_id, :user_id, :x, :y])
     |> validate_required([:canvas_id, :color_id, :user_id, :x, :y])
-    |> validate_number(:x, greater_than_or_equal_to: 0, less_than: canvas.width)
-    |> validate_number(:y, greater_than_or_equal_to: 0, less_than: canvas.height)
+    |> validate_number(:x, greater_than_or_equal_to: 0, less_than_or_equal_to: (canvas.width - 1))
+    |> validate_number(:y, greater_than_or_equal_to: 0, less_than_or_equal_to: (canvas.width - 1))
   end
 
   def update_changeset(pixel, attrs) do
