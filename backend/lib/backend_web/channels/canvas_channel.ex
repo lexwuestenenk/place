@@ -13,4 +13,12 @@ defmodule BackendWeb.CanvasChannel do
   def join("canvas:" <> _canvas_id, _payload, _socket) do
     {:error, %{reason: "unauthorized"}}
   end
+
+  def send_pixel(canvas_id, pixel) do
+    Endpoint.broadcast(
+      "canvas:#{canvas_id}",
+      "pixel.updated",
+      pixel
+    )
+  end
 end

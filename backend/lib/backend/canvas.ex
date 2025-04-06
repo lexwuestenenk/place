@@ -2,6 +2,7 @@ defmodule Backend.Canvas do
   import Ecto.Query
 
   alias Backend.Repo
+  alias BackendWeb.CanvasChannel
   alias Backend.Canvas.{Canvas, Color, Pixel}
 
   # Canvas
@@ -64,15 +65,25 @@ defmodule Backend.Canvas do
         case Repo.get(Canvas, canvas_id) do
           nil -> {:error, :canvas_not_found}
           canvas ->
-            %Pixel{}
-            |> Pixel.create_changeset(Map.merge(attrs, %{"x" => x, "y" => y}), canvas)
-            |> Repo.insert()
+            changeset = Pixel.create_changeset(%Pixel{}, Map.merge(attrs, %{"x" => x, "y" => y}), canvas)
+            case Repo.insert(changeset) do
+              {:ok, pixel} ->
+                CanvasChannel.send_pixel(canvas_id, pixel)
+                {:ok, pixel}
+
+              error -> error
+            end
         end
 
       pixel ->
-        pixel
-        |> Pixel.update_changeset(attrs)
-        |> Repo.update()
+        changeset = Pixel.update_changeset(pixel, attrs)
+        case Repo.update(changeset) do
+          {:ok, updated_pixel} ->
+            CanvasChannel.send_pixel(canvas_id, updated_pixel)
+            {:ok, updated_pixel}
+
+          error -> error
+        end
     end
   end
 
