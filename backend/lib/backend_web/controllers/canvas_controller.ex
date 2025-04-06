@@ -8,7 +8,7 @@ defmodule BackendWeb.CanvasController do
 
   def index(conn, _params) do
     canvases = CanvasContext.list_canvases()
-    json(conn, %{data: serialize_canvases(canvases)})
+    json(conn, %{canvases: serialize_canvases(canvases)})
   end
 
   def create(conn, %{
@@ -55,7 +55,7 @@ defmodule BackendWeb.CanvasController do
   end
 
   defp serialize_canvases(canvases) do
-    Enum.map(canvases, &serialize_canvas/1)
+    Enum.map(canvases, &serialize_canvas_with_colors/1)
   end
 
   defp serialize_canvas(canvas) do
@@ -70,6 +70,25 @@ defmodule BackendWeb.CanvasController do
     }
   end
 
+  defp serialize_canvas_with_colors(canvas) do
+    %{
+      id: canvas.id,
+      name: canvas.name,
+      width: canvas.width,
+      height: canvas.height,
+      cooldown: canvas.cooldown,
+      inserted_at: canvas.inserted_at,
+      updated_at: canvas.updated_at,
+      colors: Enum.map(canvas.colors, fn color ->
+        %{
+          id: color.id,
+          hex: color.hex,
+          index: color.index
+        }
+      end),
+    }
+  end
+
   defp serialize_canvas_with_relations(canvas) do
     %{
       id: canvas.id,
@@ -80,10 +99,15 @@ defmodule BackendWeb.CanvasController do
       inserted_at: canvas.inserted_at,
       updated_at: canvas.updated_at,
       colors: Enum.map(canvas.colors, fn color ->
-        %{hex: color.hex, index: color.index}
+        %{
+          id: color.id,
+          hex: color.hex,
+          index: color.index
+        }
       end),
       pixels: Enum.map(canvas.pixels, fn pixel ->
         %{
+          id: pixel.id,
           x: pixel.x,
           y: pixel.y,
           color_id: pixel.color_id,
@@ -96,7 +120,7 @@ defmodule BackendWeb.CanvasController do
   defp translate_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
+        String.replace(acc, "%{#{key}}", inspect(value))
       end)
     end)
   end

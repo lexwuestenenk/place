@@ -6,7 +6,7 @@ defmodule BackendWeb.PixelController do
 
   def index(conn, %{"canvas_id" => canvas_id}) do
     pixels = CanvasContext.list_pixels(canvas_id)
-    json(conn, %{data: serialize_pixels(pixels)})
+    json(conn, %{pixels: serialize_pixels(pixels)})
   end
 
   def create_or_update(conn, %{

@@ -1,9 +1,10 @@
 import { useRef, useEffect } from 'react';
+import { Color } from './ColorPicker';
 
 export type Pixel = {
   x: number;
   y: number;
-  color: string;
+  color: Color;
 };
 
 type Props = {
@@ -81,7 +82,6 @@ function PixelCanvas({
     };
   }, [offset, zoom, onOffsetChange, onZoomChange]);
 
-  // Handle click to select a pixel
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -122,7 +122,7 @@ function PixelCanvas({
     canvas.height = canvas.offsetHeight;
 
     // Fill full canvas background (screen space)
-    ctx.fillStyle = '#f1f5f9'; // Tailwind's slate-100
+    ctx.fillStyle = '#f1f5f9';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Zoom & pan transform
@@ -136,7 +136,7 @@ function PixelCanvas({
 
     // Draw all pixels
     for (const pixel of pixels) {
-      ctx.fillStyle = pixel.color;
+      ctx.fillStyle = `#${pixel.color.hex}`;
       ctx.fillRect(
         pixel.x * CELL_SIZE,
         pixel.y * CELL_SIZE,
@@ -163,7 +163,7 @@ function PixelCanvas({
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-full border border-black cursor-grab active:cursor-grabbing"
+      className="w-full h-full border border-black cursor-grab active:cursor-grabbing shadow-xl"
     />
   );
 }

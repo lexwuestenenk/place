@@ -5,7 +5,7 @@ defmodule BackendWeb.ColorController do
 
   def index(conn, %{"canvas_id" => canvas_id}) do
     colors = CanvasContext.list_colors(canvas_id)
-    json(conn, %{data: serialize_colors(colors)})
+    json(conn, %{colors: serialize_colors(colors)})
   end
 
   def create(conn, %{
@@ -25,7 +25,7 @@ defmodule BackendWeb.ColorController do
   def update(conn, %{"canvas_id" => canvas_id, "color_id" => color_id} = params) do
     case CanvasContext.update_color(canvas_id, color_id, Map.delete(params, ["canvas_id", "color_id"])) do
       {:ok, color} ->
-        json(conn, %{canvas: serialize_color(color)})
+        json(conn, %{color: serialize_color(color)})
 
       {:error, :not_found} ->
         send_resp(conn, 404, "color.not_found")
@@ -52,7 +52,7 @@ defmodule BackendWeb.ColorController do
   defp translate_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
+        String.replace(acc, "%{#{key}}", inspect(value))
       end)
     end)
   end

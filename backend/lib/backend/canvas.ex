@@ -7,6 +7,7 @@ defmodule Backend.Canvas do
   # Canvas
   def list_canvases() do
     Repo.all(Canvas)
+    |> Repo.preload(:colors)
   end
 
   def create_canvas(name, width, height, cooldown) do

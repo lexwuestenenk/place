@@ -40,7 +40,7 @@ defmodule Backend.Accounts.User do
       submitting the form), this option can be set to `false`.
       Defaults to `true`.
   """
-  @roles ~w(user admin)a
+  @roles ~w(user admin)
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email, :username, :password, :password_confirmation, :role])

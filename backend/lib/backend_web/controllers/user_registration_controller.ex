@@ -14,7 +14,7 @@ defmodule BackendWeb.UserRegistrationController do
       {:error, changeset} ->
         errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
           Enum.reduce(opts, msg, fn {key, value}, acc ->
-            String.replace(acc, "%{#{key}}", to_string(value))
+            String.replace(acc, "%{#{key}}", inspect(value))
           end)
         end)
 
