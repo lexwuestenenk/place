@@ -121,9 +121,14 @@ export default function Login() {
                                     })
                                 } 
                                 type={showPasswordField ? "text" : "password"}
-                                className={`p-3 w-full bg-white rounded-md outline outline-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600 ${errors.password_confirmation && "outline-red-500 outline-2"}`} 
+                                className={`p-3 pr-12 w-full bg-white rounded-md outline outline-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600 ${errors.password && "outline-red-500 outline-2"}`} 
                             />
-                            <div className="absolute top-1/2 right-0 -translate-1/2 cursor-pointer" onClick={() => setShowPasswordField(!showPasswordField)}>
+                            <div   
+                                className={`absolute top-1/2 right-0 -translate-1/2 cursor-pointer transition-transform duration-200 active:scale-90 ${
+                                    showPasswordField ? "scale-110" : "scale-100"
+                                }`}
+                                onClick={() => setShowPasswordField(!showPasswordField)}
+                            >
                                 {showPasswordField ? (
                                     <EyeIcon />
                                 ) : (
