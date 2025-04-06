@@ -15,10 +15,10 @@ type Props = {
 
 const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selectedColor, selectedPixel }) => {
   return (
-    <div className="flex items-center justify-between h-full px-6 bg-white shadow-inner">
+    <div className="flex items-center justify-between h-full px-6 bg-slate-200 rounded-t-2">
       <button
         onClick={onSubmit}
-        className="ml-4 px-4 py-2 bg-blue-500 text-white rounded shadow invisible"
+        className="ml-4 px-4 py-2 bg-blue-500 text-white invisible"
       >
         Submit
       </button>
@@ -29,7 +29,7 @@ const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selected
             className={`w-10 h-10 rounded border-4 ${
               `#${color.hex.toUpperCase()}` === selectedColor.toUpperCase()
                 ? 'border-red-500'
-                : 'border-gray-300'
+                : 'border-white'
             }`}
             style={{ backgroundColor: `#${color.hex}` }}
             onClick={() => onColorClick(`#${color.hex}`)}
@@ -39,7 +39,7 @@ const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selected
 
       <button
         onClick={onSubmit}
-        className="ml-4 px-4 py-2 bg-blue-500 text-white rounded shadow"
+        className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
       >
         Submit
       </button>

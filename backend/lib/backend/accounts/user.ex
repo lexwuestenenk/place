@@ -3,10 +3,12 @@ defmodule Backend.Accounts.User do
   import Ecto.Changeset
 
   @primary_key {:id, :binary_id, autogenerate: true}
-  @derive {Jason.Encoder, only: [:id, :email, :role, :inserted_at, :updated_at]}
+  @derive {Jason.Encoder, only: [:id, :username, :email, :role, :inserted_at, :updated_at]}
   schema "users" do
     field :email, :string
+    field :username, :string
     field :password, :string, virtual: true, redact: true
+    field :password_confirmation, :string, virtual: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
@@ -41,9 +43,11 @@ defmodule Backend.Accounts.User do
   @roles ~w(user admin)a
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :role])
+    |> cast(attrs, [:email, :username, :password, :password_confirmation, :role])
     |> validate_inclusion(:role, @roles)
     |> validate_email(opts)
+    |> validate_username(opts)
+    |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
 
@@ -53,6 +57,13 @@ defmodule Backend.Accounts.User do
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> maybe_validate_unique_email(opts)
+  end
+
+  defp validate_username(changeset, _opts) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, min: 3, max: 32)
+    |> unique_constraint(:username)
   end
 
   defp validate_password(changeset, opts) do

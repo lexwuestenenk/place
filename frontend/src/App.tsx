@@ -4,6 +4,7 @@ import Layout from './layouts/layout';
 import Home from './pages/Home';
 import Login from './pages/account/login';
 import Canvas from './pages/Canvas';
+import Register from './pages/account/register';
 
 export default function App() {
 
@@ -15,6 +16,7 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="canvases/:canvas_id" element={<Canvas />} />
             <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
           </Route>
         </Routes>
       </BrowserRouter>

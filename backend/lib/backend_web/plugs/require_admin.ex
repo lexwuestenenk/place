@@ -4,7 +4,7 @@ defmodule BackendWeb.Plugs.RequireAdmin do
 
   def init(opts), do: opts
 
-  def call(%Plug.Conn{assigns: %{current_user: %{role: "user"}}} = conn, _opts), do: conn
+  def call(%Plug.Conn{assigns: %{current_user: %{role: "admin"}}} = conn, _opts), do: conn
 
   def call(conn, _opts) do
     conn

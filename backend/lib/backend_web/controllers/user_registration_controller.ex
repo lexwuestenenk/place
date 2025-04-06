@@ -11,10 +11,16 @@ defmodule BackendWeb.UserRegistrationController do
         |> put_status(:created)
         |> json(%{message: "register_success", user: user})
 
-      {:error, _changeset} ->
+      {:error, changeset} ->
+        errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+          Enum.reduce(opts, msg, fn {key, value}, acc ->
+            String.replace(acc, "%{#{key}}", to_string(value))
+          end)
+        end)
+
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{message: "email_password_duplicate"})
+        |> json(%{errors: errors})
     end
   end
 end

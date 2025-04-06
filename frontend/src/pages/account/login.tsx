@@ -1,6 +1,10 @@
 import axios, { AxiosError } from "axios"
 import { SubmitHandler, useForm } from "react-hook-form"
-import { MessageCircleWarningIcon } from "lucide-react"
+import { EyeIcon, EyeOff, MessageCircleWarningIcon } from "lucide-react"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useDispatch } from "react-redux"
+import { login } from "../../redux/slices/accountSlice"
 
 type LoginFormInputs = {
     email: string
@@ -33,6 +37,19 @@ export default function Login() {
         formState: { errors }
     } = useForm<LoginFormInputs>()
 
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const [searchParams] = useSearchParams();
+    const [message, setMessage] = useState<string | null>(searchParams.get("message"))
+    const [showPasswordField, setShowPasswordField] = useState<boolean>(false)
+
+    useEffect(() => {
+        if (message) {
+          const timer = setTimeout(() => setMessage(null), 5000);
+          return () => clearTimeout(timer);
+        }
+    }, [message]);
+
     const onSubmit: SubmitHandler<LoginFormInputs> = async (data: LoginFormInputs) => {
         try {
             const response: AxiosLoginResponse = await axios.post("http://localhost:4000/api/users/login", {
@@ -41,7 +58,10 @@ export default function Login() {
                     password: data.password
                 }
             });
+
             localStorage.setItem("token", response.data.token)
+            dispatch(login(response.data))
+            navigate("/")
         } catch (error: unknown) {
             const err = error as AxiosError<{ error: string }>;
             const serverError = err.response?.data?.error;
@@ -61,28 +81,72 @@ export default function Login() {
     };
 
     return (
-        <div className="h-screen w-screen flex justify-center items-center">
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col bg-slate-200 p-5 rounded-md gap-5">
-                {errors.root && (
-                    <div className="flex flex-row p-3 outline-red-500 outline-2 rounded-md bg-red-100 text-black gap-3 items-center">
-                        <MessageCircleWarningIcon className="text-red-500 text-sm"/>
-                        <span className="text-red-500 text-sm">{errors.root.message}</span>
+        <div className="h-screen w-screen flex justify-center items-center bg-teal-500 p-3">
+            <div className="flex flex-col gap-3 bg-white py-5 px-12 rounded-md w-full md:w-1/2 lg:w-1/4">
+                <div className="text-center text-xl font-semibold pb-10 pt-3">
+                    Log in
+                </div>
+                    {message && (
+                        <div className="flex flex-row p-3 outline-green-500 outline-2 rounded-md bg-green-100 text-black gap-3 items-center">
+                            <MessageCircleWarningIcon className="text-green-500 text-sm"/>
+                            <span className="text-green-500 text-sm">{message}</span>
+                        </div>
+                    )}
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col rounded-md gap-5">
+                    {errors.root && (
+                        <div className="flex flex-row p-3 outline-red-500 outline-2 rounded-md bg-red-100 text-black gap-3 items-center">
+                            <MessageCircleWarningIcon className="text-red-500 text-sm"/>
+                            <span className="text-red-500 text-sm">{errors.root.message}</span>
+                        </div>
+                    )}
+                    <div className="flex flex-col">
+                        <span className="pb-1">E-mail</span>
+                        <input {...register("email", { required: "Email is required" })} type="string" className={`p-3 bg-white rounded-md outline outline-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600  ${errors.email && "outline-red-500 outline-2"}`}/>
+                        {errors.email && (
+                            <span className="text-red-500 text-sm  pt-1">{errors.email.message}</span>
+                        )}
                     </div>
-                )}
-                <div className="flex flex-col">
-                    <input {...register("email", { required: "Email is required" })} type="string" className={`p-3 bg-white rounded-md ${errors.email && "outline-red-500 outline-2"}`}/>
-                    {errors.email && (
-                        <span className="text-red-500 text-sm  pt-1">{errors.email.message}</span>
-                    )}
+                    <div className="flex flex-col">
+                        <span className="pb-1">Password</span>
+                        <div className="relative">
+                            <input 
+                                {
+                                    ...register("password", 
+                                    { 
+                                        required: "Password is required",
+                                        minLength: {
+                                            value: 12,
+                                            message: "Password should be at least 12 character(s)"
+                                        },
+                                    })
+                                } 
+                                type={showPasswordField ? "text" : "password"}
+                                className={`p-3 w-full bg-white rounded-md outline outline-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-600 ${errors.password_confirmation && "outline-red-500 outline-2"}`} 
+                            />
+                            <div className="absolute top-1/2 right-0 -translate-1/2 cursor-pointer" onClick={() => setShowPasswordField(!showPasswordField)}>
+                                {showPasswordField ? (
+                                    <EyeIcon />
+                                ) : (
+                                    <EyeOff />
+                                )}
+                            </div>
+                        </div>
+                        {errors.password && (
+                            <span className="text-red-500 text-sm pt-1">{errors.password.message}</span>
+                        )}
+                    </div>
+                    <button className="p-3 bg-teal-500 font-semibold text-white hover:bg-teal-600 cursor-pointer rounded-md mt-2">Log in</button>
+                </form>
+                <div className="relative m-3">
+                    <hr />
+                    <div className="absolute left-1/2 top-1/2 bg-red-500 p-1 -translate-1/2 bg-white">
+                        OR
+                    </div>
                 </div>
-                <div className="flex flex-col">
-                    <input {...register("password", { required: "Password is required" })} type="password" className={`p-3 bg-white rounded-md ${errors.password && "outline-red-500 outline-2"}`} />
-                    {errors.password && (
-                        <span className="text-red-500 text-sm pt-1">{errors.password.message}</span>
-                    )}
-                </div>
-                <button className="p-3 bg-teal-500 font-semibold text-white hover:bg-teal-600 cursor-pointer rounded-md">Log in</button>
-            </form>
+                <Link to="/register" className="text-center text-teal-600 hover:text-teal-700 transition-all duration-150">
+                    Register an account
+                </Link>
+            </div>
         </div>
     )
 }

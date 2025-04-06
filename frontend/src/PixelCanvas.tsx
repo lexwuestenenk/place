@@ -35,7 +35,6 @@ function PixelCanvas({
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
 
-  // Handle pan and zoom
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

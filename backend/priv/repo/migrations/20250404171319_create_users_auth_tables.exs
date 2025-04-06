@@ -6,6 +6,7 @@ defmodule Backend.Repo.Migrations.CreateUsersAuthTables do
 
     create table(:users, primary_key: false) do
       add :id, :binary_id, primary_key: true
+      add :username, :string, null: false
       add :email, :citext, null: false
       add :role, :string, default: "user"
       add :hashed_password, :string, null: false
@@ -26,6 +27,7 @@ defmodule Backend.Repo.Migrations.CreateUsersAuthTables do
     end
 
     create index(:users_tokens, [:user_id])
+    create unique_index(:users, [:username])
     create unique_index(:users_tokens, [:context, :token])
   end
 end
