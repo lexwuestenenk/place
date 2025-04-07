@@ -11,10 +11,6 @@ type Props = {
 
 const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selectedColor, selectedPixel }) => {
   useEffect(() => {
-    console.log(selectedColor)
-  }, [selectedColor])
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         onSubmit();

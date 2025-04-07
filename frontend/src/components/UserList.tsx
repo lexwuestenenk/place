@@ -9,10 +9,10 @@ function UserList() {
       <h3 className="font-semibold mb-2 text-gray-800">Online Users ({Object.values(presence).length})</h3>
       <ul className="space-y-1">
         {Object.values(presence).map((user) => (
-          <li key={user.username} className="text-sm text-gray-700 flex items-center gap-2">
+          <li key={user.username} className="flex items-center text-sm text-gray-700 gap-2">
             <span
               className="inline-block w-2 h-2 rounded-full"
-              style={{ backgroundColor: user.color || '#000000' }}
+              style={{ backgroundColor: `#${user.color || "000000"}` }}
             />
             {user.username} ({user.x}, {user.y})
           </li>

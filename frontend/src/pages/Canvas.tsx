@@ -30,12 +30,19 @@ export default function Canvas() {
   const handlePixelClick = useCallback((x: number, y: number) => {
     setSelectedPixel({ x, y });
     phoenix?.sendPresenceUpdate(x, y, selectedColor?.hex || "")
-  }, [selectedColor?.hex, user.username, phoenix]);
+  }, [selectedColor?.hex, phoenix]);
 
   useEffect(() => {
     if(!canvas_id) return 
     dispatch(setCurrentCanvasId(canvas_id))
   }, [canvas_id, dispatch])
+
+  useEffect(() => {
+    if(!selectedColor) return
+    if(!selectedPixel) return
+    
+    phoenix?.sendPresenceUpdate(selectedPixel.x, selectedPixel.y, selectedColor?.hex || "")
+  })
 
   const handleApplyColor = async () => {
     if (!selectedPixel) return;
