@@ -21,7 +21,7 @@ const presenceSlice = createSlice({
         setPresenceState(_, action: PayloadAction<PresenceState>) {
             return action.payload;
         },
-        updateUserPresence(state, action: PayloadAction<{ userId: string; data: PresenceEntry }>) {
+        updateUserPresence(state, action: PayloadAction<{ userId: string; data: PresenceMeta }>) {
             state[action.payload.userId] = action.payload.data;
         },
         removeUserPresence(state, action: PayloadAction<string>) {

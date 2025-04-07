@@ -136,7 +136,7 @@ export default function Canvas() {
   }
 
   return (
-      <div className="w-screen h-screen flex flex-col">
+      <div className="w-screen h-screen flex flex-col overflow-hidden">
         <ColorPicker
           colors={Object.values(canvas?.colors ?? {})}
           selectedColor={selectedColor}
