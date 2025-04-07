@@ -16,7 +16,8 @@ defmodule Backend.Application do
       # Start a worker by calling: Backend.Worker.start_link(arg)
       # {Backend.Worker, arg},
       # Start to serve requests, typically the last entry
-      BackendWeb.Endpoint
+      BackendWeb.Endpoint,
+      BackendWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

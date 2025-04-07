@@ -39,7 +39,7 @@ defmodule BackendWeb.UserSocket do
   def connect(%{"token" => token}, socket, _connect_info) do
     case Accounts.fetch_user_by_api_token(token) do
       {:ok, user} ->
-        {:ok, assign(socket, :current_user, user)}
+        {:ok, assign(socket, :user, user)}
       :error ->
         :error
     end

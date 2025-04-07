@@ -1,11 +1,16 @@
 import { createContext, useEffect, useRef } from "react";
-import { Socket, Channel } from "phoenix";
+import { Socket, Channel, Presence } from "phoenix";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { updatePixel } from "../redux/slices/canvasSlice";
+import { PresenceState, removeUserPresence, setPresenceState, updateUserPresence } from '../redux/slices/presenceSlice';
 import { Pixel } from "../types";
 
-const PhoenixContext = createContext(null);
+type PhoenixContextType = {
+    sendPresenceUpdate: (x: number, y: number, color: string) => void;
+};
+  
+export const PhoenixContext = createContext<PhoenixContextType | null>(null);
 
 export const PhoenixProvider = ({ children }: {children: React.ReactNode}) => {
     const user = useSelector((state: RootState) => state.account.user)
@@ -15,6 +20,7 @@ export const PhoenixProvider = ({ children }: {children: React.ReactNode}) => {
     const dispatch = useDispatch()
     const socketRef = useRef<Socket | null>(null)
     const canvasChannelRef = useRef<Channel | null>(null);
+    const canvasChannelPresence = useRef<Presence | null>(null);
 
     const joinChannel = async (socket: Socket, topic: string, onJoin: (channel: Channel) => void) => {
         const channel = socket.channel(topic, {});
@@ -33,6 +39,59 @@ export const PhoenixProvider = ({ children }: {children: React.ReactNode}) => {
         if (canvasChannelRef.current) {
             canvasChannelRef.current.leave() 
         }
+
+        const presence = new Presence(channel);
+        presence.onSync(() => {
+            const list = presence.list((id, { metas }) => {
+              const latest = metas[metas.length - 1];
+              return {
+                userId: id,
+                username: latest.username ?? "unknown",
+                x: Number(latest.x ?? 0),
+                y: Number(latest.y ?? 0),
+                color: latest.color ?? "#000000",
+              };
+            });
+          
+            // Convert array to { [userId]: PresenceEntry }
+            const state: PresenceState = {};
+            for (const user of list) {
+              state[user.userId] = {
+                username: user.username,
+                x: user.x,
+                y: user.y,
+                color: user.color,
+              };
+            }
+          
+            dispatch(setPresenceState(state));
+          });
+          
+          
+          presence.onJoin((id, _current, newPresence) => {
+            if (!id) return;
+          
+            const latest = newPresence.metas[newPresence.metas.length - 1];
+          
+            dispatch(updateUserPresence({
+              userId: id,
+              data: {
+                username: latest.username ?? "unknown",
+                x: Number(latest.x ?? 0),
+                y: Number(latest.y ?? 0),
+                color: latest.color ?? "#000000"
+              }
+            }));
+          });
+          
+          presence.onLeave((id, current) => {
+            if (id && current.metas.length === 1) {
+              dispatch(removeUserPresence(id));
+            }
+          });
+
+        canvasChannelPresence.current = presence;
+        canvasChannelRef.current = channel;
 
         channel.on("pixel.updated", (pixel: Pixel) => {
             if(!currentCanvasId) return;
@@ -83,8 +142,14 @@ export const PhoenixProvider = ({ children }: {children: React.ReactNode}) => {
         }
     }, [currentCanvasId, dispatch])
 
+    const sendPresenceUpdate = (x: number, y: number, color: string) => {
+        if (canvasChannelRef.current) {
+          canvasChannelRef.current.push("presence.update", { x, y, color });
+        }
+    };
+
     return (
-        <PhoenixContext.Provider value={null}>
+        <PhoenixContext.Provider value={{ sendPresenceUpdate }}>
             {children}
         </PhoenixContext.Provider>
     );

@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import accountReducer from './slices/accountSlice'
 import canvasReducer from './slices/canvasSlice' 
+import presenceReducer from './slices/presenceSlice'
 
 export const store = configureStore({
     reducer: {
         account: accountReducer,
-        canvas: canvasReducer
+        canvas: canvasReducer,
+        presence: presenceReducer
     },
 })
 

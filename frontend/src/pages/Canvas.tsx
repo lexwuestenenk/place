@@ -1,16 +1,20 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useContext } from 'react';
 import PixelCanvas from '../components/PixelCanvas';
 import ColorPicker from '../components/ColorPicker';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { Color } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { selectCurrentCanvas, setCanvas, setCurrentCanvasId } from '../redux/slices/canvasSlice';
+import { PhoenixContext } from '../components/socket-provider';
 import { useParams } from 'react-router-dom';
+import UserList from '../components/UserList';
 
 export default function Canvas() {
   const dispatch = useDispatch()
+  const phoenix = useContext(PhoenixContext);
   const token = useSelector((state: RootState) => state.account.token)
+  const user = useSelector((state: RootState) => state.account.user)
   const currentCanvasId = useSelector((state: RootState) => state.canvas.currentCanvasId)
   const canvas = useSelector(selectCurrentCanvas)
   const { canvas_id } = useParams() 
@@ -25,7 +29,8 @@ export default function Canvas() {
 
   const handlePixelClick = useCallback((x: number, y: number) => {
     setSelectedPixel({ x, y });
-  }, []);
+    phoenix?.sendPresenceUpdate(x, y, selectedColor?.hex || "")
+  }, [selectedColor?.hex, user.username, phoenix]);
 
   useEffect(() => {
     if(!canvas_id) return 
@@ -118,12 +123,13 @@ export default function Canvas() {
       }
   
       setSelectedPixel({ x, y });
+      phoenix?.sendPresenceUpdate(x, y, selectedColor?.hex || "")
       e.preventDefault();
     };
   
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPixel, canvas]);
+  }, [selectedPixel, canvas, phoenix, user.username, selectedColor?.hex]);
 
   if (!canvas) {
     return <div className="text-white text-center mt-10">Loading canvas...</div>;
@@ -151,6 +157,7 @@ export default function Canvas() {
               selectedPixel={selectedPixel}
             />
         </div>
+        <UserList />
       </div>
     )
 }
