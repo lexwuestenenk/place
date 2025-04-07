@@ -1,13 +1,18 @@
 defmodule BackendWeb.CanvasChannel do
-  use ChatAppWeb, :canvas
-
-  alias ChatApp.Repo
-  alias ChatAppWeb.Endpoint
-  alias ChatApp.Canvas.Canvas
+  use BackendWeb, :channel
+  alias BackendWeb.Endpoint
 
   @impl true
-  def join("canvas:" <> canvas_id, _payload, %{assigns: %{current_user: _user}} = socket) do
-    {:ok, socket}
+  def join("canvas:" <> _canvas_id, _payload, socket) do
+    IO.inspect(socket.assigns, label: "JOIN SOCKET ASSIGNS")
+
+    case Map.get(socket.assigns, :current_user) do
+      nil ->
+        {:error, %{reason: "unauthorized"}}
+
+      _user ->
+        {:ok, socket}
+    end
   end
 
   def join("canvas:" <> _canvas_id, _payload, _socket) do

@@ -1,6 +1,6 @@
-defmodule ChatAppWeb.UserSocket do
+defmodule BackendWeb.UserSocket do
   use Phoenix.Socket
-  alias ChatApp.Accounts
+  alias Backend.Accounts
 
   # A Socket handler
   #
@@ -9,9 +9,9 @@ defmodule ChatAppWeb.UserSocket do
 
   ## Channels
   # Uncomment the following line to define a "room:*" topic
-  # pointing to the `ChatAppWeb.RoomChannel`:
+  # pointing to the `BackendWeb.RoomChannel`:
   #
-  # channel "room:*", ChatAppWeb.RoomChannel
+  # channel "room:*", BackendWeb.RoomChannel
   #
   # To create a channel file, use the mix task:
   #
@@ -45,9 +45,7 @@ defmodule ChatAppWeb.UserSocket do
     end
   end
 
-  channel "friend_requests:*", ChatAppWeb.FriendRequestChannel
-  channel "dm_notifications:*", ChatAppWeb.DmNotificationsChannel
-  channel "dm:*", ChatAppWeb.DmChannel
+  channel "canvas:*", BackendWeb.CanvasChannel
 
   # Socket IDs are topics that allow you to identify all sockets for a given user:
   #
@@ -56,7 +54,7 @@ defmodule ChatAppWeb.UserSocket do
   # Would allow you to broadcast a "disconnect" event and terminate
   # all active sockets and channels for a given user:
   #
-  #     Elixir.ChatAppWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
+  #     Elixir.BackendWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
   @impl true

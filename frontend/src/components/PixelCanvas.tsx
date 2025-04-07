@@ -1,11 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Color } from './ColorPicker';
-
-export type Pixel = {
-  x: number;
-  y: number;
-  color: Color;
-};
+import { Pixel } from '../types';
 
 type Props = {
   pixels: Pixel[];

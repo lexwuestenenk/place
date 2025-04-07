@@ -3,10 +3,11 @@ defmodule BackendWeb.PixelController do
 
   alias Backend.Repo
   alias Backend.Canvas, as: CanvasContext
+  alias BackendWeb.Serializers.Pixel, as: PixelSerializer
 
   def index(conn, %{"canvas_id" => canvas_id}) do
     pixels = CanvasContext.list_pixels(canvas_id)
-    json(conn, %{pixels: serialize_pixels(pixels)})
+    json(conn, %{pixels: PixelSerializer.serialize_pixels(pixels)})
   end
 
   def create_or_update(conn, %{
@@ -25,41 +26,13 @@ defmodule BackendWeb.PixelController do
     ) do
       {:ok, pixel} ->
         pixel_with_relations = Repo.preload(pixel, [:canvas, :color, :user])
-        json(conn, %{pixel: serialize_pixel_with_relations(pixel_with_relations)})
+        json(conn, %{pixel: PixelSerializer.serialize_pixel_with_relations(pixel_with_relations)})
 
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{errors: translate_errors(changeset)})
     end
-  end
-
-  defp serialize_pixels(pixels) do
-    Enum.map(pixels, &serialize_pixel_with_relations/1)
-  end
-
-  defp serialize_pixel_with_relations(pixel) do
-    %{
-      canvas:
-        %{
-          id: pixel.canvas.id,
-          name: pixel.canvas.name,
-          width: pixel.canvas.width,
-          height: pixel.canvas.height
-        },
-      color:
-        %{
-          id: pixel.color.id,
-          hex: pixel.color.hex,
-        },
-      user:
-        %{
-          id: pixel.user.id,
-          email: pixel.user.email
-        },
-      x: pixel.x,
-      y: pixel.y,
-    }
   end
 
   defp translate_errors(changeset) do

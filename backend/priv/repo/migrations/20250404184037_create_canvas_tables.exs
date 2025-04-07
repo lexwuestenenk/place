@@ -43,5 +43,7 @@ defmodule Elixir.Backend.Repo.Migrations.CreateCanvasTables do
 
       timestamps(type: :utc_datetime)
     end
+
+    create unique_index(:pixels, [:canvas_id, :x, :y])
   end
 end

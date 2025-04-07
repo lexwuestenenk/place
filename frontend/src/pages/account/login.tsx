@@ -5,18 +5,11 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import { login } from "../../redux/slices/accountSlice"
+import { User } from "../../types"
 
 type LoginFormInputs = {
     email: string
     password: string
-}
-
-type User = {
-    id: string
-    email: string
-    role: "user" | "admin"
-    inserted_at: string
-    updated_at: string
 }
 
 type LoginSuccessResponse = {
@@ -61,7 +54,7 @@ export default function Login() {
 
             localStorage.setItem("token", response.data.token)
             dispatch(login(response.data))
-            navigate("/")
+            navigate("/canvases")
         } catch (error: unknown) {
             const err = error as AxiosError<{ error: string }>;
             const serverError = err.response?.data?.error;

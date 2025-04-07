@@ -4,6 +4,7 @@ defmodule Backend.Canvas do
   alias Backend.Repo
   alias BackendWeb.CanvasChannel
   alias Backend.Canvas.{Canvas, Color, Pixel}
+  alias BackendWeb.Serializers.Pixel, as: PixelSerializer
 
   # Canvas
   def list_canvases() do
@@ -67,9 +68,10 @@ defmodule Backend.Canvas do
           canvas ->
             changeset = Pixel.create_changeset(%Pixel{}, Map.merge(attrs, %{"x" => x, "y" => y}), canvas)
             case Repo.insert(changeset) do
-              {:ok, pixel} ->
-                CanvasChannel.send_pixel(canvas_id, pixel)
-                {:ok, pixel}
+              {:ok, updated_pixel} ->
+                updated_pixel = Repo.preload(updated_pixel, [:color, :user])
+                CanvasChannel.send_pixel(canvas_id, PixelSerializer.serialize_pixel_with_color_and_user(updated_pixel))
+                {:ok, updated_pixel}
 
               error -> error
             end
@@ -79,7 +81,8 @@ defmodule Backend.Canvas do
         changeset = Pixel.update_changeset(pixel, attrs)
         case Repo.update(changeset) do
           {:ok, updated_pixel} ->
-            CanvasChannel.send_pixel(canvas_id, updated_pixel)
+            updated_pixel = Repo.preload(updated_pixel, [:color, :user])
+            CanvasChannel.send_pixel(canvas_id, PixelSerializer.serialize_pixel_with_color_and_user(updated_pixel))
             {:ok, updated_pixel}
 
           error -> error

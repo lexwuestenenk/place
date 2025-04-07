@@ -1,10 +1,5 @@
 import React, { useEffect } from 'react';
-
-export type Color = {
-  id: string;
-  hex: string;
-  index: number;
-};
+import { Color } from '../types';
 
 type Props = {
     colors: Color[];

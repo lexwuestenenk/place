@@ -2,10 +2,11 @@ defmodule BackendWeb.ColorController do
   use BackendWeb, :controller
 
   alias Backend.Canvas, as: CanvasContext
+  alias BackendWeb.Serializers.Color, as: ColorSerializer
 
   def index(conn, %{"canvas_id" => canvas_id}) do
     colors = CanvasContext.list_colors(canvas_id)
-    json(conn, %{colors: serialize_colors(colors)})
+    json(conn, %{colors: ColorSerializer.serialize_colors(colors)})
   end
 
   def create(conn, %{
@@ -14,7 +15,7 @@ defmodule BackendWeb.ColorController do
     "index" => index,
   }) do
     case CanvasContext.create_color(canvas_id, hex, index) do
-      {:ok, color} -> json(conn, %{color: serialize_color(color)})
+      {:ok, color} -> json(conn, %{color: ColorSerializer.serialize_color(color)})
       {:error, reason} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -25,7 +26,7 @@ defmodule BackendWeb.ColorController do
   def update(conn, %{"canvas_id" => canvas_id, "color_id" => color_id} = params) do
     case CanvasContext.update_color(canvas_id, color_id, Map.delete(params, ["canvas_id", "color_id"])) do
       {:ok, color} ->
-        json(conn, %{color: serialize_color(color)})
+        json(conn, %{color: ColorSerializer.serialize_color(color)})
 
       {:error, :not_found} ->
         send_resp(conn, 404, "color.not_found")
@@ -35,18 +36,6 @@ defmodule BackendWeb.ColorController do
         |> put_status(:unprocessable_entity)
         |> json(%{errors: translate_errors(changeset)})
     end
-  end
-
-  defp serialize_colors(colors) do
-    Enum.map(colors, &serialize_color/1)
-  end
-
-  defp serialize_color(color) do
-    %{
-      id: color.id,
-      hex: color.hex,
-      index: color.index,
-    }
   end
 
   defp translate_errors(changeset) do
