@@ -58,11 +58,30 @@ function PixelCanvas({
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+    
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+    
+      // World coordinates before zoom
+      const worldX = (mouseX - offset.x) / zoom;
+      const worldY = (mouseY - offset.y) / zoom;
+    
+      // Zoom in or out
       const scaleFactor = 1.1;
       const newZoom = e.deltaY < 0 ? zoom * scaleFactor : zoom / scaleFactor;
-      onZoomChange(Math.max(0.1, Math.min(newZoom, 20)));
+      const clampedZoom = Math.max(0.1, Math.min(newZoom, 20));
+    
+      // New offset to keep the world point under the mouse in the same place
+      const newOffsetX = mouseX - worldX * clampedZoom;
+      const newOffsetY = mouseY - worldY * clampedZoom;
+    
+      onZoomChange(clampedZoom);
+      onOffsetChange({ x: newOffsetX, y: newOffsetY });
     };
-
+    
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);

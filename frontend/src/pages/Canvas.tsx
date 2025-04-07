@@ -1,17 +1,19 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import PixelCanvas from '../components/PixelCanvas';
 import ColorPicker from '../components/ColorPicker';
 import axios, { AxiosResponse } from 'axios';
 import { Color } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { selectCurrentCanvas, setCanvas } from '../redux/slices/canvasSlice';
+import { selectCurrentCanvas, setCanvas, setCurrentCanvasId } from '../redux/slices/canvasSlice';
+import { useParams } from 'react-router-dom';
 
 export default function Canvas() {
   const dispatch = useDispatch()
   const token = useSelector((state: RootState) => state.account.token)
   const currentCanvasId = useSelector((state: RootState) => state.canvas.currentCanvasId)
   const canvas = useSelector(selectCurrentCanvas)
+  const { canvas_id } = useParams() 
 
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -19,28 +21,30 @@ export default function Canvas() {
   const [selectedPixel, setSelectedPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedColor, setSelectedColor] = useState<Color | null>(null);
 
+  const hasCentered = useRef(false);
+
   const handlePixelClick = useCallback((x: number, y: number) => {
     setSelectedPixel({ x, y });
   }, []);
+
+  useEffect(() => {
+    if(!canvas_id) return 
+    dispatch(setCurrentCanvasId(canvas_id))
+  }, [canvas_id, dispatch])
 
   const handleApplyColor = async () => {
     if (!selectedPixel) return;
     if (!selectedColor) return;
     if(!canvas) return;
 
-    console.log('selected_pixel', selectedPixel)
-    console.log('selected_color', selectedColor)
-    console.log('canvas', canvas)
-
     try {
-      const response: AxiosResponse = await axios.patch(`http://localhost:4000/api/canvases/${currentCanvasId}/pixels/${selectedPixel.x}/${selectedPixel.y}`, {
+      await axios.patch(`http://localhost:4000/api/canvases/${currentCanvasId}/pixels/${selectedPixel.x}/${selectedPixel.y}`, {
         color_id: selectedColor.id
       }, {
         headers: {
           authorization: `Bearer ${token}`
         }
       });
-      console.log(response.data)
     } catch(error) {
       console.error(error)
     }
@@ -75,6 +79,20 @@ export default function Canvas() {
       getCanvas(currentCanvasId)
     }
   }, [token, currentCanvasId, dispatch])
+
+
+  useEffect(() => {
+    if (!canvas || hasCentered.current) return;
+  
+    const canvasWidth = canvas.meta.width * 10 * zoom;
+    const canvasHeight = canvas.meta.height * 10 * zoom;
+  
+    const x = (window.innerWidth - canvasWidth) / 2;
+    const y = (window.innerHeight - canvasHeight) / 2;
+  
+    setOffset({ x, y });
+    hasCentered.current = true;
+  }, [canvas]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -113,15 +131,13 @@ export default function Canvas() {
 
   return (
       <div className="w-screen h-screen flex flex-col">
-        <div className="absolute bottom-0 left-1/2 w-3/4 -translate-x-1/2 h-[12vh] rounded-md">
-            <ColorPicker
-              colors={Object.values(canvas?.colors ?? {})}
-              selectedColor={selectedColor}
-              onColorClick={setSelectedColor}
-              onSubmit={handleApplyColor}
-              selectedPixel={selectedPixel}
-            />
-        </div>
+        <ColorPicker
+          colors={Object.values(canvas?.colors ?? {})}
+          selectedColor={selectedColor}
+          onColorClick={setSelectedColor}
+          onSubmit={handleApplyColor}
+          selectedPixel={selectedPixel}
+        />
         <div className="flex-1">
             <PixelCanvas
               pixels={Object.values(canvas?.pixels ?? {})}

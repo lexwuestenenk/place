@@ -29,11 +29,12 @@ export default function Login() {
         setError,
         formState: { errors }
     } = useForm<LoginFormInputs>()
+    const [searchParams] = useSearchParams();
+    const [message, setMessage] = useState<string | null>(searchParams.get("message"))
+    const next = searchParams.get("next")
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const [searchParams] = useSearchParams();
-    const [message, setMessage] = useState<string | null>(searchParams.get("message"))
     const [showPasswordField, setShowPasswordField] = useState<boolean>(false)
 
     useEffect(() => {
@@ -54,7 +55,7 @@ export default function Login() {
 
             localStorage.setItem("token", response.data.token)
             dispatch(login(response.data))
-            navigate("/canvases")
+            navigate(next || "/canvases")
         } catch (error: unknown) {
             const err = error as AxiosError<{ error: string }>;
             const serverError = err.response?.data?.error;

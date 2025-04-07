@@ -22,7 +22,7 @@ defmodule Backend.Canvas.Pixel do
     |> validate_required([:canvas_id, :color_id, :user_id, :x, :y])
     |> unique_constraint(:x, name: :pixels_canvas_id_x_y_index)
     |> validate_number(:x, greater_than_or_equal_to: 0, less_than_or_equal_to: (canvas.width - 1))
-    |> validate_number(:y, greater_than_or_equal_to: 0, less_than_or_equal_to: (canvas.width - 1))
+    |> validate_number(:y, greater_than_or_equal_to: 0, less_than_or_equal_to: (canvas.height - 1))
   end
 
   def update_changeset(pixel, attrs) do

@@ -6,6 +6,7 @@ import Login from './pages/account/login';
 import Canvas from './pages/canvas';
 import Register from './pages/account/register';
 import AuthenticatedLayout from './layouts/authenticated-layout';
+import ProtectedRoute from './components/protected-route';
 
 export default function App() {
 
@@ -17,7 +18,11 @@ export default function App() {
             <Route index path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
           </Route>
-          <Route path="/canvases" element={<AuthenticatedLayout />}>
+          <Route path="/canvases" element={
+              <ProtectedRoute>
+                <AuthenticatedLayout />
+              </ProtectedRoute>
+            }>
               <Route index element={<Home />} />
               <Route path=":canvas_id" element={<Canvas />} />
           </Route>

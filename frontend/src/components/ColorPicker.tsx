@@ -26,37 +26,35 @@ const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selected
   }, [onSubmit]);
 
   return (
-    <div className="flex items-center justify-between h-full bg-slate-200 rounded-md">
+    <div className="flex flex-col items-center gap-2 absolute bottom-4 max-w-3/4 left-1/2 -translate-x-1/2">
       <button
         onClick={onSubmit}
-        className="ml-4 px-4 py-2 bg-blue-500 text-white invisible"
+        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-md shadow transition"
       >
         Submit
       </button>
-      <div className="flex flex-wrap justify-center gap-2 p-4 bg-white shadow-inner rounded-t-lg border-t border-gray-300">
+
+      <div className="flex flex-wrap items-center justify-center gap-3 bg-white p-4 rounded-xl shadow-md border border-gray-200">
         {colors.map((color) => (
           <button
             key={color.id}
-            className={`w-10 h-10 rounded border-4 
-              ${selectedColor && color.id === selectedColor.id
-                  ? 'border-red-500'
-                  : 'border-white'
-              }`
-            }
-            style={{ backgroundColor: `#${color.hex}` }}
             onClick={() => onColorClick(color)}
+            title={`#${color.hex}`}
+            className={`w-10 h-10 rounded-md transition-transform transform hover:scale-110 focus:outline-none ${
+              selectedColor?.id === color.id
+                ? 'ring-4 ring-emerald-400'
+                : 'ring-2 ring-transparent'
+            }`}
+            style={{ backgroundColor: `#${color.hex}` }}
           />
         ))}
       </div>
 
-      <button
-        onClick={onSubmit}
-        className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Submit
-      </button>
+      {/* Coordinates */}
       {selectedPixel && (
-        <span className='absolute bottom-2 right-2'>({selectedPixel.x}, {selectedPixel.y})</span>
+        <span className="text-sm text-gray-600">
+          ({selectedPixel.x}, {selectedPixel.y})
+        </span>
       )}
     </div>
   );
