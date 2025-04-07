@@ -23,8 +23,8 @@ defmodule Backend.Seeds.CanvasSeeder do
     Enum.each(1..3, fn i ->
       canvas_attrs = %{
         name: "Canvas ##{i}",
-        width: 100 * i,
-        height: 100 * (i * 2),
+        width: 10000 * i,
+        height: 10000 * i,
         cooldown: 10
       }
 

@@ -72,7 +72,7 @@ function PixelCanvas({
       // Zoom in or out
       const scaleFactor = 1.1;
       const newZoom = e.deltaY < 0 ? zoom * scaleFactor : zoom / scaleFactor;
-      const clampedZoom = Math.max(0.1, Math.min(newZoom, 20));
+      const clampedZoom = Math.max(0.01, Math.min(newZoom, 20));
     
       // New offset to keep the world point under the mouse in the same place
       const newOffsetX = mouseX - worldX * clampedZoom;
