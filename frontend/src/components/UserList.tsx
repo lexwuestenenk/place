@@ -9,7 +9,7 @@ function UserList() {
       <h3 className="font-semibold mb-2 text-gray-800">Online Users ({Object.values(presence).length})</h3>
       <div className='flex flex-col'>
         {Object.values(presence).map((user) => (
-          <div key={user.username} className="flex items-center text-sm text-gray-700 gap-2 border-l-4 m-2" style={{ borderColor: `#${user.color}`}}>
+          <div key={user.username} className="flex items-center text-sm text-gray-700 gap-2 border-l-4 m-1" style={{ borderColor: `#${user.color}`}}>
             <div className='pl-3'>{user.username} ({user.x}, {user.y})</div>
           </div>
         ))}
