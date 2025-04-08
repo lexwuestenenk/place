@@ -34,7 +34,7 @@ const ColorPicker: React.FC<Props> = ({ cooldown, colors, onColorClick, onSubmit
       ) : (
         <button
           onClick={onSubmit}
-          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-md shadow transition"
+          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-md shadow transition cursor-pointer"
         >
           <CheckIcon />
         </button>
