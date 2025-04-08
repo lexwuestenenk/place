@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Color } from '../types';
-import { CheckIcon, LoaderIcon } from 'lucide-react';
+import { CheckIcon } from 'lucide-react';
 
 type Props = {
-    colors: Color[];
-    onColorClick: (color: Color) => void;
-    onSubmit: () => void;
-    selectedColor: Color | null
-    selectedPixel: { x: number; y: number } | null;
+  cooldown: number;
+  colors: Color[];
+  onColorClick: (color: Color) => void;
+  onSubmit: () => void;
+  selectedColor: Color | null
+  selectedPixel: { x: number; y: number } | null;
 };
 
-const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selectedColor, selectedPixel }) => {
-  const [cooldown, setCooldown] = useState<number>(0);
+const ColorPicker: React.FC<Props> = ({ cooldown, colors, onColorClick, onSubmit, selectedColor, selectedPixel }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
@@ -29,7 +29,7 @@ const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selected
         <button
           className="px-4 py-2 bg-emerald-700 cursor-disabled text-white font-semibold rounded-md shadow transition cursor-not-allowed"
         >
-          <LoaderIcon className='animate-spin'/>
+          {cooldown}
         </button>
       ) : (
         <button
@@ -41,7 +41,7 @@ const ColorPicker: React.FC<Props> = ({ colors, onColorClick, onSubmit, selected
       )}
 
 
-      <div className="flex flex-wrap items-center justify-center gap-3 bg-white p-4 rounded-xl shadow-md border border-gray-200">
+      <div className="flex flex-wrap items-center justify-center gap-3 bg-white p-4 rounded-xl shadow-md border border-gray-200 max-h-[13.5vh] overflow-y-auto">
         {colors.map((color) => (
           <button
             key={color.id}

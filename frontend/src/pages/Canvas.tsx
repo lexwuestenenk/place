@@ -21,6 +21,7 @@ export default function Canvas() {
 
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [cooldown, setCooldown] = useState<number>(0);
 
   const [selectedPixel, setSelectedPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedColor, setSelectedColor] = useState<Color | null>(null);
@@ -31,6 +32,22 @@ export default function Canvas() {
     setSelectedPixel({ x, y });
     phoenix?.sendPresenceUpdate(x, y, selectedColor?.hex || "")
   }, [selectedColor?.hex, phoenix]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+  
+    const interval = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  }, [cooldown]);
 
   useEffect(() => {
     if(!canvas_id) return 
@@ -57,6 +74,7 @@ export default function Canvas() {
           authorization: `Bearer ${token}`
         }
       });
+      setCooldown(canvas.meta.cooldown)
     } catch(error) {
       console.error(error)
     }
@@ -145,6 +163,7 @@ export default function Canvas() {
   return (
       <div className="w-screen h-screen flex flex-col overflow-hidden">
         <ColorPicker
+          cooldown={cooldown}
           colors={Object.values(canvas?.colors ?? {})}
           selectedColor={selectedColor}
           onColorClick={setSelectedColor}
