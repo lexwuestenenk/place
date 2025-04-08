@@ -36,21 +36,15 @@ defmodule BackendWeb.CanvasChannel do
   def handle_in("presence.update", %{"x" => x, "y" => y, "color" => color}, socket) do
     user = socket.assigns.user
 
-    IO.inspect(Presence.list(socket), label: "📍 BEFORE update")
-
-    Presence.update(socket, user.id, fn
-      %{x: old_x, y: old_y} = meta ->
-        Map.merge(meta, %{x: x, y: y, color: color})
-      _ ->
-        %{
-          x: x,
-          y: y,
-          color: color,
-          username: user.username,
-          joined_at: DateTime.utc_now()
-        }
+    Presence.update(socket, user.id, fn meta ->
+      Map.merge(meta, %{
+        x: x,
+        y: y,
+        color: color,
+        username: user.username,
+        joined_at: Map.get(meta, :joined_at, DateTime.utc_now())
+      })
     end)
-    IO.inspect(Presence.list(socket), label: "📍 AFTER update")
 
     {:noreply, socket}
   end
@@ -60,6 +54,15 @@ defmodule BackendWeb.CanvasChannel do
       "canvas:#{canvas_id}",
       "pixel.updated",
       pixel
+    )
+  end
+
+  def send_updated_canvas(canvas) do
+    IO.puts("AJSDAKSDB JKAHSBDHABDS JAHBSJdbh")
+    Endpoint.broadcast(
+      "canvas:#{canvas.id}",
+      "canvas.updated",
+      canvas
     )
   end
 end

@@ -2,7 +2,7 @@ import { createContext, useEffect, useRef } from "react";
 import { Socket, Channel, Presence } from "phoenix";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { updatePixel } from "../redux/slices/canvasSlice";
+import { setCanvas, updatePixel } from "../redux/slices/canvasSlice";
 import { PresenceState, removeUserPresence, setPresenceState, updateUserPresence } from '../redux/slices/presenceSlice';
 import { Pixel } from "../types";
 
@@ -100,6 +100,16 @@ export const PhoenixProvider = ({ children }: {children: React.ReactNode}) => {
                 pixel
             }))
         })
+
+        channel.on("canvas.updated", (payload) => {
+            if (!currentCanvasId) return;
+            
+            dispatch(setCanvas({
+              meta: payload,
+              pixels: undefined,
+              colors: payload.colors,
+            }));
+          });
 
         canvasChannelRef.current = channel
     }

@@ -5,6 +5,7 @@ defmodule Backend.Canvas do
   alias BackendWeb.CanvasChannel
   alias Backend.Canvas.{Canvas, Color, Pixel}
   alias BackendWeb.Serializers.Pixel, as: PixelSerializer
+  alias BackendWeb.Serializers.Canvas, as: CanvasSerializer
 
   # Canvas
   def list_canvases() do
@@ -26,7 +27,16 @@ defmodule Backend.Canvas do
   def update_canvas(canvas_id, attrs) do
     case Repo.get(Canvas, canvas_id) do
       nil -> {:error, :not_found}
-      canvas -> canvas |> Canvas.update_changeset(attrs) |> Repo.update()
+      canvas ->
+        changeset = Canvas.update_changeset(canvas, attrs)
+        case Repo.update(changeset) do
+          {:ok, updated_canvas} ->
+            updated_canvas = Repo.preload(updated_canvas, [:colors])
+            CanvasChannel.send_updated_canvas(CanvasSerializer.serialize_canvas_with_colors(updated_canvas))
+            {:ok, updated_canvas}
+
+            error -> error
+        end
     end
   end
 
@@ -37,19 +47,43 @@ defmodule Backend.Canvas do
   end
 
   def create_color(canvas_id, hex, index) do
-    %Color{}
-    |> Color.create_changeset(%{
-      canvas_id: canvas_id,
-      hex: hex,
-      index: index
-    })
-    |> Repo.insert()
+    case Repo.get(Canvas, canvas_id) do
+      nil ->
+        {:error, :not_found}
+
+      canvas ->
+        case %Color{}
+        |> Color.create_changeset(%{
+          canvas_id: canvas_id,
+          hex: hex,
+          index: index
+        })
+        |> Repo.insert() do
+          {:ok, color} ->
+            canvas_with_colors = Repo.preload(canvas, [:colors])
+            CanvasChannel.send_updated_canvas(CanvasSerializer.serialize_canvas_with_colors(canvas_with_colors))
+            {:ok, color}
+
+          error -> error
+        end
+    end
   end
 
+
   def update_color(canvas_id, color_id, attrs) do
-    case Repo.get_by(Color, [id: color_id, canvas_id: canvas_id]) do
-      nil -> {:error, :not_found}
-      color -> color |> Color.update_changeset(attrs) |> Repo.update()
+    case Repo.get(Canvas, canvas_id) do
+      nil ->
+        {:error, :not_found}
+
+      canvas ->
+        case Repo.get_by(Color, [id: color_id, canvas_id: canvas_id]) do
+          nil -> {:error, :not_found}
+          color ->
+            color |> Color.update_changeset(attrs) |> Repo.update()
+            canvas_with_colors = Repo.preload(canvas, [:colors])
+            CanvasChannel.send_updated_canvas(CanvasSerializer.serialize_canvas_with_colors(canvas_with_colors))
+            {:ok, color}
+        end
     end
   end
 

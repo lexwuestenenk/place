@@ -153,9 +153,6 @@ export default function Canvas() {
         />
         <div className="flex-1">
             <PixelCanvas
-              pixels={Object.values(canvas?.pixels ?? {})}
-              gridWidth={canvas?.meta.width || 0}
-              gridHeight={canvas?.meta.height || 0}
               zoom={zoom}
               offset={offset}
               onZoomChange={setZoom}

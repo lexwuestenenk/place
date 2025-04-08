@@ -1,10 +1,8 @@
 import { useRef, useEffect } from 'react';
-import { Pixel } from '../types';
+import { useSelector } from 'react-redux';
+import { selectCurrentCanvas } from '../redux/slices/canvasSlice';
 
 type Props = {
-  pixels: Pixel[];
-  gridWidth: number;
-  gridHeight: number;
   zoom: number;
   offset: { x: number; y: number };
   onZoomChange: (zoom: number) => void;
@@ -16,9 +14,6 @@ type Props = {
 const CELL_SIZE = 10;
 
 function PixelCanvas({
-  pixels,
-  gridWidth,
-  gridHeight,
   zoom,
   offset,
   onZoomChange,
@@ -27,6 +22,7 @@ function PixelCanvas({
   selectedPixel
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const reduxCanvas = useSelector(selectCurrentCanvas)
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
 
@@ -109,9 +105,9 @@ function PixelCanvas({
 
       if (
         pixelX >= 0 &&
-        pixelX < gridWidth &&
+        pixelX < (reduxCanvas?.meta.width || 0) &&
         pixelY >= 0 &&
-        pixelY < gridHeight
+        pixelY < (reduxCanvas?.meta.height || 0)
       ) {
         onPixelClick(pixelX, pixelY);
       }
@@ -121,7 +117,7 @@ function PixelCanvas({
     return () => {
       canvas.removeEventListener('click', handleClick);
     };
-  }, [zoom, offset, gridWidth, gridHeight, onPixelClick]);
+  }, [zoom, offset, reduxCanvas?.meta.width, reduxCanvas?.meta.height, onPixelClick]);
 
   // Render canvas content
   useEffect(() => {
@@ -145,10 +141,10 @@ function PixelCanvas({
 
     // Draw white grid background (inside zoom space)
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, gridWidth * CELL_SIZE, gridHeight * CELL_SIZE);
+    ctx.fillRect(0, 0, (reduxCanvas?.meta.width || 0) * CELL_SIZE, (reduxCanvas?.meta.height || 0) * CELL_SIZE);
 
     // Draw all pixels
-    for (const pixel of pixels) {
+    for (const pixel of Object.values(reduxCanvas?.pixels || {})) {
       ctx.fillStyle = `#${pixel.color.hex}`;
       ctx.fillRect(
         pixel.x * CELL_SIZE,
@@ -171,7 +167,7 @@ function PixelCanvas({
     }
 
     ctx.restore();
-  }, [pixels, zoom, offset, selectedPixel, gridWidth, gridHeight]);
+  }, [zoom, offset, selectedPixel, reduxCanvas?.meta.width, reduxCanvas?.meta.height, reduxCanvas?.pixels]);
 
   return (
     <canvas

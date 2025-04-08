@@ -59,16 +59,17 @@ const canvasSlice = createSlice({
 
     setCanvas(state, action: PayloadAction<{ meta: Canvas; pixels?: Pixel[]; colors: Color[] }>) {
       const { meta, pixels, colors } = action.payload;
-
+      const existing = state.entities[meta.id];
+    
       const pixelMap = pixels
         ? Object.fromEntries(pixels.map(p => [pixelKey(p.x, p.y), p]))
-        : undefined;
-
+        : existing?.pixels;
+    
       const colorMap: Record<string, Color> = {};
       for (const c of colors) {
         colorMap[c.id] = c;
       }
-
+    
       state.entities[meta.id] = {
         meta,
         pixels: pixelMap,
