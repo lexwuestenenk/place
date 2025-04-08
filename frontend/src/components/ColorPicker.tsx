@@ -25,22 +25,25 @@ const ColorPicker: React.FC<Props> = ({ cooldown, colors, onColorClick, onSubmit
 
   return (
     <div className="flex flex-col items-center gap-2 absolute bottom-4 max-w-3/4 left-1/2 -translate-x-1/2">
-      {cooldown > 0 ? (
-        <button
-          className="px-4 py-2 bg-emerald-700 cursor-disabled text-white font-semibold rounded-md shadow transition cursor-not-allowed"
-        >
-          {cooldown}
-        </button>
-      ) : (
-        <button
-          onClick={onSubmit}
-          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-md shadow transition cursor-pointer"
-        >
-          <CheckIcon />
-        </button>
-      )}
+      <button
+        onClick={() => {
+          if(cooldown > 0) return
 
-
+          onSubmit()
+        }}
+        className={
+          `
+            flex justify-center py-2 min-w-[4rem] text-white font-semibold shadow rounded-md transition-all duration-200 
+            ${
+              cooldown > 0 
+                ? "bg-yellow-500 cursor-not-allowed"
+                : "bg-teal-500 hover:bg-emerald-600 cursor-pointer"
+            }
+          `
+        }
+      >
+        {cooldown > 0 ? (cooldown) : (<CheckIcon />) }
+      </button>
       <div className="flex flex-wrap items-center justify-center gap-3 bg-white p-4 rounded-xl shadow-md border border-gray-200 max-h-[13.5vh] overflow-y-auto">
         {colors.map((color) => (
           <button
