@@ -30,8 +30,7 @@ export default function Canvas() {
 
   const handlePixelClick = useCallback((x: number, y: number) => {
     setSelectedPixel({ x, y });
-    phoenix?.sendPresenceUpdate(x, y, selectedColor?.hex || "")
-  }, [selectedColor?.hex, phoenix]);
+  }, []);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -59,7 +58,7 @@ export default function Canvas() {
     if(!selectedPixel) return
     
     phoenix?.sendPresenceUpdate(selectedPixel.x, selectedPixel.y, selectedColor?.hex || "")
-  })
+  }, [selectedColor, selectedPixel, phoenix])
 
   const handleApplyColor = async () => {
     if (!selectedPixel) return;
@@ -67,7 +66,9 @@ export default function Canvas() {
     if(!canvas) return;
 
     try {
-      await axios.patch(`http://localhost:4000/api/canvases/${currentCanvasId}/pixels/${selectedPixel.x}/${selectedPixel.y}`, {
+      await axios.patch(`http://localhost:4000/api/canvases/${currentCanvasId}/pixels`, {
+        x: selectedPixel.x,
+        y: selectedPixel.y,
         color_id: selectedColor.id
       }, {
         headers: {

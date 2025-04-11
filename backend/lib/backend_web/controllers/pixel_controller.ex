@@ -15,10 +15,11 @@ defmodule BackendWeb.PixelController do
     "x" => x,
     "y" => y,
   } = params) do
-    user_id = conn.assigns.current_user.id
-    params = Map.put(params, "user_id", user_id)
+    user = conn.assigns.current_user
+    params = Map.put(params, "user_id", user.id)
 
     case CanvasContext.upsert_pixel_by_position(
+      user,
       canvas_id,
       x,
       y,

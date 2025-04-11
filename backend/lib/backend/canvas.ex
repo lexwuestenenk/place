@@ -3,7 +3,7 @@ defmodule Backend.Canvas do
 
   alias Backend.Repo
   alias BackendWeb.CanvasChannel
-  alias Backend.Canvas.{Canvas, Color, Pixel}
+  alias Backend.Canvas.{Canvas, Color, Pixel, PixelHistory}
   alias BackendWeb.Serializers.Pixel, as: PixelSerializer
   alias BackendWeb.Serializers.Canvas, as: CanvasSerializer
 
@@ -94,7 +94,7 @@ defmodule Backend.Canvas do
     |> Repo.preload([:canvas, :color, :user])
   end
 
-  def upsert_pixel_by_position(canvas_id, x, y, attrs) do
+  def upsert_pixel_by_position(user, canvas_id, x, y, attrs) do
     case Repo.get_by(Pixel, [canvas_id: canvas_id, x: x, y: y]) do
       nil ->
         case Repo.get(Canvas, canvas_id) do
@@ -112,16 +112,50 @@ defmodule Backend.Canvas do
         end
 
       pixel ->
-        changeset = Pixel.update_changeset(pixel, attrs)
-        case Repo.update(changeset) do
-          {:ok, updated_pixel} ->
-            updated_pixel = Repo.preload(updated_pixel, [:color, :user])
-            CanvasChannel.send_pixel(canvas_id, PixelSerializer.serialize_pixel_with_color_and_user(updated_pixel))
-            {:ok, updated_pixel}
+        canvas = Repo.get!(Canvas, canvas_id)
+        pixel = Repo.preload(pixel, :pixel_histories)
 
-          error -> error
+        latest_entry =
+          pixel.pixel_histories
+          |> Enum.filter(fn h -> h.user_id == user.id end)
+          |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
+          |> List.first()
+
+        if within_cooldown?(latest_entry, canvas.cooldown) do
+          {:error, :cooldown_active}
+        else
+          Repo.insert!(%Backend.Canvas.PixelHistory{
+            pixel_id: pixel.id,
+            color_id: pixel.color_id,
+            user_id: pixel.user_id
+          })
+
+          changeset = Pixel.update_changeset(pixel, attrs)
+
+          case Repo.update(changeset) do
+            {:ok, updated_pixel} ->
+              updated_pixel = Repo.preload(updated_pixel, [:color, :user])
+              CanvasChannel.send_pixel(canvas_id, PixelSerializer.serialize_pixel_with_color_and_user(updated_pixel))
+              {:ok, updated_pixel}
+
+            error -> error
+          end
         end
     end
+  end
+
+  defp within_cooldown?(nil, _), do: false
+  defp within_cooldown?(%{inserted_at: inserted_at}, cooldown_seconds) do
+    DateTime.diff(DateTime.utc_now(), inserted_at) < cooldown_seconds
+  end
+
+  def list_pixel_histories(pixel_id) do
+    from(ph in PixelHistory,
+      where: ph.pixel_id == ^pixel_id,
+      preload: [:pixel, :color, :user],
+      order_by: [desc: ph.inserted_at]
+    )
+    |> Repo.all()
   end
 
   def update_pixel_by_id(pixel_id, attrs) do

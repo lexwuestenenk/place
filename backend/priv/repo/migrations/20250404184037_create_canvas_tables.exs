@@ -34,7 +34,7 @@ defmodule Elixir.Backend.Repo.Migrations.CreateCanvasTables do
       timestamps(type: :utc_datetime)
     end
 
-    create table(:pixels_history, primary_key: false) do
+    create table(:pixel_histories, primary_key: false) do
       add :id, :binary_id, primary_key: true
 
       add :pixel_id, references(:pixels, type: :binary_id, on_delete: :delete_all), null: false

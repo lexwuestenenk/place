@@ -22,6 +22,33 @@ type AxiosLoginResponse = {
     data: LoginSuccessResponse
 }
 
+const messageStyles: Record<
+  string,
+  { bg: string; outline: string; text: string }
+> = {
+  success: {
+    bg: "bg-green-100",
+    outline: "outline-green-500",
+    text: "text-green-500",
+  },
+  error: {
+    bg: "bg-red-100",
+    outline: "outline-red-500",
+    text: "text-red-500",
+  },
+  warning: {
+    bg: "bg-yellow-100",
+    outline: "outline-yellow-500",
+    text: "text-yellow-600",
+  },
+  info: {
+    bg: "bg-blue-100",
+    outline: "outline-blue-500",
+    text: "text-blue-500",
+  },
+};
+
+
 export default function Login() {
     const {
         register,
@@ -31,6 +58,9 @@ export default function Login() {
     } = useForm<LoginFormInputs>()
     const [searchParams] = useSearchParams();
     const [message, setMessage] = useState<string | null>(searchParams.get("message"))
+    const type = searchParams.get("messageType") || "info";
+    const styles = messageStyles[type] || messageStyles["success"];
+    
     const next = searchParams.get("next")
 
     const dispatch = useDispatch()
@@ -80,12 +110,15 @@ export default function Login() {
                 <div className="text-center text-xl font-semibold pb-10 pt-3">
                     Log in
                 </div>
-                    {message && (
-                        <div className="flex flex-row p-3 outline-green-500 outline-2 rounded-md bg-green-100 text-black gap-3 items-center">
-                            <MessageCircleWarningIcon className="text-green-500 text-sm"/>
-                            <span className="text-green-500 text-sm">{message}</span>
-                        </div>
-                    )}
+                {message && (
+                    <div
+                        className={`flex flex-row p-3 rounded-md text-black gap-3 items-center outline-2 ${styles.bg} ${styles.outline}`}
+                    >
+                        <MessageCircleWarningIcon className={`text-sm ${styles.text}`} />
+                        <span className={`text-sm ${styles.text}`}>{message}</span>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col rounded-md gap-5">
                     {errors.root && (
                         <div className="flex flex-row p-3 outline-red-500 outline-2 rounded-md bg-red-100 text-black gap-3 items-center">

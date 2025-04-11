@@ -30,6 +30,8 @@ defmodule BackendWeb.Router do
   scope "/api", BackendWeb do
     pipe_through [:api, :authenticated]
 
+    get "/users/me", UserController, :show_self
+
     get "/canvases", CanvasController, :index
     get "/canvases/:canvas_id", CanvasController, :show
     post "/canvases", CanvasController, :create
@@ -37,7 +39,8 @@ defmodule BackendWeb.Router do
 
     get "/canvases/:canvas_id/pixels", PixelController, :index
     get "/canvases/:canvas_id/pixels/:pixel_id", PixelController, :show
-    patch "/canvases/:canvas_id/pixels/:x/:y", PixelController, :create_or_update
+    get "/canvases/:canvas_id/pixels/:pixel_id/history", PixelHistoryController, :index
+    patch "/canvases/:canvas_id/pixels", PixelController, :create_or_update
 
     get "/canvases/:canvas_id/colors", ColorController, :index
   end
@@ -45,6 +48,7 @@ defmodule BackendWeb.Router do
   scope "/api", BackendWeb do
     pipe_through [:api, :authenticated, :admin]
 
+    get "/users/:user_id", UserController, :show
     post "/canvases/:canvas_id/colors", ColorController, :create
     patch "/canvases/:canvas_id/colors/:color_id", ColorController, :update
 
