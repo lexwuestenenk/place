@@ -14,14 +14,14 @@ type Props = {
 const ColorPicker: React.FC<Props> = ({ cooldown, colors, onColorClick, onSubmit, selectedColor, selectedPixel }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !(cooldown > 0)) {
         onSubmit();
       }
     };
   
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onSubmit]);
+  }, [onSubmit, cooldown]);
 
   return (
     <div className="flex flex-col items-center gap-2 absolute bottom-4 max-w-3/4 left-1/2 -translate-x-1/2">

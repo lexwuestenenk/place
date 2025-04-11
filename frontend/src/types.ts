@@ -20,7 +20,7 @@ export type Pixel = {
     x: number;
     y: number;
     color: Color;
-  };
+};
 
   
 export type User = {
